@@ -55,7 +55,7 @@ function services_admin_browse_index() {
 function services_admin_browse_method() {
   global $services_admin_browse_test_submit_result;
   
-  if ($_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' && user_access('test methods')) {
+  if ($_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' && user_access('administer services')) {
     drupal_get_form('services_admin_browse_test');
     $output.= '<h3>' . t('Result') . '</h3>';
     $output.= '<code>' . $services_admin_browse_test_submit_result . '</code>';
@@ -93,7 +93,7 @@ function services_admin_browse_method() {
   
   
   // display results
-  if (user_access('test methods')) {
+  if (user_access('administer services')) {
     $output.= '<div id="output">';
     if ($services_admin_browse_test_submit_result) {
       $output.= '<h3>' . t('Result') . '</h3>';
