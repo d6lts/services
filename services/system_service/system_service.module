@@ -67,6 +67,41 @@ function system_service_service() {
       ),
       '#return'   => 'struct',
       '#help'     => t('Send an e-mail message, using Drupal variables and default settings.')),
+      
+    // system.getVariable
+    array(
+      '#method'   => 'system.getVariable',
+      '#callback' => 'system_service_getvariable',
+      '#args'     => array(
+        array(
+          '#name'         => 'name',
+          '#type'         => 'string',
+          '#description'  => t('The name of the variable to return.')),
+        array(
+          '#name'         => 'default',
+          '#type'         => 'string',
+          '#optional'     => TRUE, 
+          '#description'  => t('The default value to use if this variable has never been set.'))),
+      '#return'   => 'string',
+      '#help'     => t('Return a persistent variable.')),
+      
+    // system.setVariable
+    array(
+      '#method'   => 'system.setVariable',
+      '#callback' => 'system_service_setvariable',
+      '#args'     => array(
+        array(
+          '#name'         => 'name',
+          '#type'         => 'string',
+          '#description'  => t('The name of the variable to set.')
+          ),
+        array(
+          '#name'         => 'value',
+          '#type'         => 'string',
+          '#description'  => t('The value to set.')
+        ),
+      ),
+      '#help'     => t('Set a persistent variable.')),
   );
 }
 
@@ -83,6 +118,9 @@ function system_service_connect() {
   return $return;
 }
 
+/**
+ * Send an email via the Services module.
+ */ 
 function system_service_mail($mailkey, $to, $subject, $body, $from = NULL, $headers = array()) {
   $status = drupal_mail($mailkey, $to, $subject, $body, $from, $headers);
   if (!$status) {
@@ -90,4 +128,18 @@ function system_service_mail($mailkey, $to, $subject, $body, $from = NULL, $head
   }
   
   return $status;
+}
+
+/**
+ * Returns a specified variable.
+ */
+function system_service_getvariable($name, $default = NULL) {
+  return variable_get($name, $default);
+}
+
+/**
+ * Set a variable.
+ */
+function system_service_setvariable($name, $value) {
+  variable_set($name, $value);
 }
