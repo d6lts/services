@@ -209,6 +209,12 @@ function services_admin_settings() {
     '#default_value' => variable_get('services_use_key', TRUE),
     '#description' => t('When enabled, all method calls must include a valid key.')
   );
+  $form['security']['services_domain_strict'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Strict domain checking'),
+    '#default_value' => variable_get('services_domain_strict', FALSE),
+    '#description' => t('When enabled, all method calls must include their domain to validate against the key.')
+  );
   $form['security']['services_use_sessid'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use sessid'),
@@ -331,7 +337,17 @@ function services_method_call($method_name, $args = array()) {
   // add additonal processing for methods requiring api key
   if (variable_get('services_use_key', TRUE)) {
     $api_key = array_shift($args);
-    if (!services_validate_key($api_key)) {
+    $domain = null;
+    $timestamp = null;
+    $hash =  null;
+    //strict domain matching
+    if(variable_get('services_domain_strict', false)){
+      $domain = array_shift($args);
+      $timestamp = array_shift($args);
+      $hash = $api_key;
+      $api_key = db_result(db_query("SELECT kid FROM {services_keys} WHERE domain = '%s'",$domain));
+    }
+    if (!services_validate_key($api_key, $timestamp, $domain,$hash)) {
       return services_error(t('Invalid API key.'));
     }
   }
@@ -380,6 +396,19 @@ function services_get_all() {
       '#description' => t('A valid sessid.'),
     );
     
+    // domain arg
+    $arg_domain_check = array(
+      '#name' => 'domain_check',
+      '#type' => 'string',
+      '#description' => t('A valid domain for the API key.'),
+    );
+    
+    $arg_domain_time_stamp = array(
+      '#name' => 'domain_time_stamp',
+      '#type' => 'string',
+      '#description' => t('Time stamp used to hash key.'),
+    );
+    
     foreach ($methods as $key => $method) {
       
       // set method defaults
@@ -391,6 +420,10 @@ function services_get_all() {
       }
       
       if (variable_get('services_use_key', TRUE)) {
+        if(variable_get('services_domain_strict',FALSE)){
+          $methods[$key]['#args'] = array_merge(array($arg_domain_time_stamp), $methods[$key]['#args']);
+          $methods[$key]['#args'] = array_merge(array($arg_domain_check), $methods[$key]['#args']);
+        }
         $methods[$key]['#args'] = array_merge(array($arg_api_key), $methods[$key]['#args']);
       }
       
@@ -428,13 +461,26 @@ function services_method_get($method_name) {
   return $method_cache[$method_name];
 }
 
-function services_validate_key($kid) {
-  $key = services_get_key($kid);
-  if ($key) {
-    return TRUE;
+function services_validate_key($kid,$timestamp,$domain,$hash) {
+  if(!variable_get('services_domain_strict', false)){
+    $key = services_get_key($kid);
+    if ($key) {
+      return TRUE;	
+    }
+    //compare the domain against the key
+    else{
+      return FALSE;
+    }
+    
   }
-  else {
-    return FALSE;
+  else{
+  	$rehash = md5($kid . $timestamp . $domain);
+  	if($rehash == $hash){
+  	  return true;
+  	}
+  	else{
+  	  return false;
+  	}
   }
 }
 

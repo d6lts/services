@@ -118,6 +118,7 @@ function services_admin_browse_test() {
     //$form['type'][$key]         = array('#value' => $arg['#type']);
     
     switch ($arg['#name']) {
+            
       case 'api_key':
         $form['arg'][$key] = array('#type' => 'textfield', '#default_value' => services_admin_browse_get_first_key());
         break;
@@ -125,7 +126,15 @@ function services_admin_browse_test() {
       case 'sessid':
         $form['arg'][$key] = array('#type' => 'textfield', '#default_value' => session_id());
         break;
+      
+      case 'domain_check':
+        $form['arg'][$key] = array('#type' => 'textfield', '#default_value' => $_SERVER['HTTP_HOST']);
+        break;
         
+      case 'domain_time_stamp':
+        $form['arg'][$key] = array('#type' => 'textfield', '#default_value' => time());
+        break;
+          
       default:
         $form['arg'][$key] = array('#type' => 'textfield');
         break;
