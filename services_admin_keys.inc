@@ -47,7 +47,7 @@ function services_admin_keys_form($key = NULL) {
     $form['key'] = array(
       '#type' => 'markup',
       '#title' => t('Key'),
-      '#value' => '<strong>' . t('API Key') . ':</strong> ' . $key->kid,
+      '#value' => '<strong>'. t('API Key') .':</strong> '. $key->kid,
     ); 
   }
   

@@ -2,31 +2,31 @@
 // $Id$
 
 /**
- * Callback for 'services/browse'
+ * Callback for 'services/browse'.
  */
 function services_admin_browse_index() {
   $methods = services_get_all();
   
-  // show enable server modules
+  // Show enable server modules.
   $servers = module_implements('server_info');
-  $output.= '<h2>' . t('Servers') . '</h2>';
+  $output .= '<h2>'. t('Servers') .'</h2>';
   
   if (!empty($servers)) {
-    $output.= '<ul>';
+    $output .= '<ul>';
     foreach ($servers as $module) {
       $info = module_invoke($module, 'server_info');
       $name = $info['#name'];
-      $path = 'services/' . $info['#path'];
-      $output .= '<li class="leaf">' . l($name . " - /$path", $path) . '</li>';
+      $path = 'services/'. $info['#path'];
+      $output .= '<li class="leaf">'. l($name ." - /$path", $path) .'</li>';
     }
-    $output.= '</ul>';
+    $output .= '</ul>';
   }
   else {
-    $output.= '<p>' . t('You must enable at least one server module to be able to connect remotely. Visit the <a href="@url">modules</a> page to enable server modules.', array('@url' => url('admin/build/modules'))) . '</p>';
+    $output .= '<p>'. t('You must enable at least one server module to be able to connect remotely. Visit the <a href="@url">modules</a> page to enable server modules.', array('@url' => url('admin/build/modules'))) .'</p>';
   }
   
   
-  $output.= '<h2>' . t('Services') . '</h2>';
+  $output .= '<h2>'. t('Services') .'</h2>';
   
   // group namespaces
   $services = array();
@@ -37,28 +37,28 @@ function services_admin_browse_index() {
   
   if (count($services)) {
     foreach ($services as $namespace => $methods) {
-      $output.= '<h3>' . $namespace . '</h3>';
-      $output.= '<ul>';
+      $output .= '<h3>'. $namespace .'</h3>';
+      $output .= '<ul>';
       foreach ($methods as $method) {
-        $output.= '<li class="leaf">' . l($method['#method'], 'admin/build/services/browse/' . $method['#method']) . '</li>';
+        $output .= '<li class="leaf">'. l($method['#method'], 'admin/build/services/browse/'. $method['#method']) .'</li>';
       }
-      $output.= '</ul>';
+      $output .= '</ul>';
     }
   }
   else {
-    $output.= t('No services have been enabled.');
+    $output .= t('No services have been enabled.');
   }
   
   return $output;
 }
 
 function services_admin_browse_method() {
-  global $services_admin_browse_test_submit_result;
+  global $_services_admin_browse_test_submit_result;
   
   if ($_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' && user_access('administer services')) {
     drupal_get_form('services_admin_browse_test');
-    $output.= '<h3>' . t('Result') . '</h3>';
-    $output.= '<code>' . $services_admin_browse_test_submit_result . '</code>';
+    $output .= '<h3>'. t('Result') .'</h3>';
+    $output .= '<code>'. $_services_admin_browse_test_submit_result .'</code>';
     print $output;
     exit; 
   }
@@ -71,35 +71,35 @@ function services_admin_browse_method() {
   
   //die(print_r($method, true));
   //drupal_set_title($method['#method']);
-  $output.= '<h3>' . $method['#method'] . '</h3>';
-  $output.= '<p>' . $method['#help'] . '</p>';
+  $output .= '<h3>'. $method['#method'] .'</h3>';
+  $output .= '<p>'. $method['#help'] .'</p>';
   
-  // List arguments
-  $output.= '<h3>' . t('Arguments') . ' (' . count($method['#args']) . ')' . '</h3>';
-  $output.= '<dl id="service-browser-arguments">';
+  // List arguments.
+  $output .= '<h3>'. t('Arguments') .' ('. count($method['#args']) .')</h3>';
+  $output .= '<dl id="service-browser-arguments">';
   $count = 0;
   foreach ($method['#args'] as $arg) {
     $count++;
-    $output.= '<dt><em class="type">' . $arg['#type'] . '</em> <strong class="name">' . $arg['#name'] . '</strong> ' . ' (' . (($arg['#optional']) ? t('optional') : t('required')) . ')' . '</dt>';
-    $output.= '<dd>' . $arg['#description'] . '</dd>';
+    $output .= '<dt><em class="type">'. $arg['#type'] .'</em> <strong class="name">'. $arg['#name'] .'</strong>  ('. (($arg['#optional']) ? t('optional') : t('required')) .')</dt>';
+    $output .= '<dd>'. $arg['#description'] .'</dd>';
   }
   
-  $output.= '</dl>';
+  $output .= '</dl>';
   
-  // allow testing of methods
-  $output.= '<h3>' . t('Call method') . '</h3>';
-  $output.= drupal_get_form('services_admin_browse_test');
+  // Allow testing of methods.
+  $output .= '<h3>'. t('Call method') .'</h3>';
+  $output .= drupal_get_form('services_admin_browse_test');
   
   
   
-  // display results
+  // Display results.
   if (user_access('administer services')) {
-    $output.= '<div id="output">';
-    if ($services_admin_browse_test_submit_result) {
-      $output.= '<h3>' . t('Result') . '</h3>';
-      $output.= '<code>' . $services_admin_browse_test_submit_result . '</code>';
+    $output .= '<div id="output">';
+    if ($_services_admin_browse_test_submit_result) {
+      $output .= '<h3>'. t('Result') .'</h3>';
+      $output .= '<code>'. $_services_admin_browse_test_submit_result .'</code>';
     }
-    $output.= '</div>';
+    $output .= '</div>';
   }
   
 
@@ -155,23 +155,23 @@ function services_admin_browse_get_first_key() {
 }
 
 function services_admin_browse_test_submit($form_id, $form_values) {
-  global $services_admin_browse_test_submit_result;
+  global $_services_admin_browse_test_submit_result;
   $method = services_method_get(arg(4));
   $args = services_admin_browse_test_unserialize_args($form_values['arg']);
   $result = services_method_call($method['#method'], $args);
-  $services_admin_browse_test_submit_result = check_markup(print_r($result, true), 1);
+  $_services_admin_browse_test_submit_result = check_markup(print_r($result, true), 1);
 }
 
 function services_admin_browse_test_unserialize_args($values) {
   $method = services_method_get(arg(4));
   
-  // convert args
+  // Convert args.
   for ($c = count($method['#args']) - 1; $c >= 0; $c--) {
     $arg = $method['#args'][$c];
     $value = $values[$c];
     
-    // remove empty values from end of array
-    // once we find a value, we can no longer skip
+    // Remove empty values from end of array.
+    // Once we find a value, we can no longer skip.
     if (empty($value) && !$noskip) continue;
     $noskip = true;
     
@@ -200,7 +200,7 @@ function services_admin_browse_test_unserialize_args($values) {
 function theme_services_admin_browse_test($form) {
   //die(print_r($form, true));
   $output = '';
-  $output.= drupal_render($form['test']);
+  $output .= drupal_render($form['test']);
 
   $header = array(t('Name'), t('Required'), t('Value'));
   $rows = array();
@@ -212,10 +212,10 @@ function theme_services_admin_browse_test($form) {
     $rows[] = $row;
   }
   
-  $output.= theme('table', $header, $rows);
-  $output.= drupal_render($form['submit']);
+  $output .= theme('table', $header, $rows);
+  $output .= drupal_render($form['submit']);
   
-  $output.= drupal_render($form);
+  $output .= drupal_render($form);
   
   return $output;
 }
