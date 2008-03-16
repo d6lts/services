@@ -85,4 +85,5 @@ function node_service_save($edit) {
   $node = node_submit($edit);
   node_save($node);
   watchdog('content', t('@type: updated %title.', array('@type' => t($node->type), '%title' => $node->title)), WATCHDOG_NOTICE, l(t('view'), 'node/'. $node->nid));
+  return $node;
 }
