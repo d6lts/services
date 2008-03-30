@@ -4,7 +4,6 @@
 /**
  * Implementation of hook_help().
  */
-
 function views_service_help($section) {
   switch ($section) {
     case 'admin/help#services_views':
@@ -17,9 +16,9 @@ function views_service_help($section) {
 /**
  * Implementation of hook_service().
  */
-
 function views_service_service() {
   return array(
+    // views.getView
     array(
       '#method'   => 'views.getView',
       '#callback' => 'views_service_get_view',
@@ -41,16 +40,48 @@ function views_service_service() {
           '#description'  => t('An array of arguments to pass to the view.'))),
       '#return'   => 'array',
       '#help'     => t('Retrieves a view defined in views.module.')),
+
+    // views.exportView
+    array(
+      '#method'   => 'views.exportView',
+      '#callback' => 'views_service_export_view',
+      '#args'     => array('string'),
+      '#args'     => array(
+        array(
+          '#name'         => 'view_name',
+          '#type'         => 'string',
+          '#description'  => t('View name.'),
+        ),
+      ),
+          
+      '#return'   => 'string',
+      '#help'     => t('Exports the code of a view, same as the output you would get from the Export tab.'),
+    ),
+
+    // views.importView
+    array(
+      '#method'   => 'views.importView',
+      '#callback' => 'views_service_import_view',
+      '#args'     => array('string'),
+      '#args'     => array(
+        array(
+          '#name'         => 'view_export',
+          '#type'         => 'string',
+          '#description'  => t('Code from a Views->Export.'),
+        ),
+      ),
+      '#return'   => 'int',
+      '#help'     => t('Imports a view through code, equivalent to using the Import tab in the views admin.'),
+    ),
   );
 }
 
 /**
- * get a view from the database
+ * Get a view from the database.
  */
 function views_service_get_view($view_name, $fields = array(), $args = array()) { 
   $view = views_get_view($view_name);
-  if ($view == null)
-  {
+  if (is_null($view)) {
     return services_error('View does not exist.');
   }
   
@@ -60,4 +91,41 @@ function views_service_get_view($view_name, $fields = array(), $args = array()) 
   }
   
   return $nodes;
+}
+
+/**
+ * Export a view.
+ */
+function views_service_export_view($view_name) { 
+  $view = views_get_view($view_name);
+  if (is_null($view)) {
+    return services_error('View does not exist.');
+  }
+  
+  return views_create_view_code($view_name);
+}
+
+/**
+ * Import a view.
+ */
+function views_service_import_view($view_export) { 
+  views_load_cache();
+  ob_start();
+  eval($view_export);
+  ob_end_clean();
+
+  // Views exports don't contain vids, therefore we have to
+  // check and see if the view already exists. If so, save
+  // the existing vid into our imported view object. Otherwise
+  // _views_save_view() will treat this as an insert rather than
+  // as an update.
+  $existing_view = views_get_view($view->name);
+  if ($existing_view) {
+    $view->vid = $existing_view->vid;
+  }
+
+  views_sanitize_view($view);
+  $vid = _views_save_view($view);
+  
+  return $vid;
 }
