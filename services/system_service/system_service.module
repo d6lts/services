@@ -102,6 +102,20 @@ function system_service_service() {
         ),
       ),
       '#help'     => t('Set a persistent variable.')),
+
+    // system.moduleExists
+    array(
+      '#method'   => 'system.moduleExists',
+      '#callback' => 'system_service_module_exists',
+      '#args'     => array(
+        array(
+          '#name'         => 'module',
+          '#type'         => 'string',
+          '#description'  => t('The name of the module.')
+        ),
+      ),
+      '#return'   => 'string',
+      '#help'     => t('Check if a module is enabled. If so, return its version.')),
   );
 }
 
@@ -143,3 +157,18 @@ function system_service_getvariable($name, $default = NULL) {
 function system_service_setvariable($name, $value) {
   variable_set($name, $value);
 }
+
+/**
+ * Check if a module is enabled. If so, return its version.
+ */
+function system_service_module_exists($module) {
+  if (module_exists($module)) {
+    $modules = module_rebuild_cache();
+    if (array_key_exists($module, $modules)) {
+      return (string)$modules[$module]->info['version'];  
+    }    
+  }
+  
+  return "";
+}
+
