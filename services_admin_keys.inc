@@ -61,7 +61,7 @@ function services_admin_keys_form($key = NULL) {
     '#title' => t('Allowed domain'),
     '#type' => 'textfield',
     '#default_value' => $key->domain,
-    '#description' => t('External domain allowed to use this key. (One domain per line)'),
+    '#description' => t('External domain allowed to use this key.'),
   );
   
   $form['submit'] = array(
