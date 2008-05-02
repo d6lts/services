@@ -42,3 +42,13 @@ function xmlrpc_server_call_wrapper() {
   return services_method_call($method_name, $args);
 }
 
+function xmlrpc_server_server_error($message) {
+  static $xmlrpcusererr;
+  if (!is_array($message)) {
+    $message = array($message);
+  }
+
+  $message = implode(' ', $message);
+
+  return xmlrpc_error($xmlrpcusererr + 1, strip_tags($message));
+}
