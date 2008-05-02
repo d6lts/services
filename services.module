@@ -321,7 +321,7 @@ function services_method_call($method_name, $args = array()) {
   
   // Check that method exists.
   if (empty($method)) {
-    return services_error(t('Method does not exist.'));
+    return services_error(t('Method %name does not exist.', array('%name' => $method_name)));
   }
   
   // Check for missing args.
@@ -352,12 +352,13 @@ function services_method_call($method_name, $args = array()) {
   }
   
   // Add additonal processing for methods requiring authentication.
+  $session_backup = NULL;
   if ($method['#auth'] && variable_get('services_use_sessid', TRUE)) {
     $sessid = array_shift($args);
     if (empty($sessid)) {
       return services_error(t('Invalid sessid.'));
     }
-    services_session_restart($sessid);
+    $session_backup = services_session_load($sessid);
   }
   
   // Change working directory to drupal root to call drupal function,
@@ -371,9 +372,12 @@ function services_method_call($method_name, $args = array()) {
   if ($server_info) {
     chdir($server_root);
   }
-  
-  //return print_r($result, true);
-  
+
+  // Add additonal processing for methods requiring authentication.
+  if ($session_backup !== NULL) {
+    services_session_unload($session_backup);
+  }
+
   return $result;
 }
 
@@ -522,8 +526,7 @@ function services_node_load($node, $fields = array()) {
   if (!$node->nid) {
     return null;
   }
-  
-  
+
   // Apply filters to fields.
   $body = $node->body;
   $node->body = new stdClass();
@@ -544,13 +547,66 @@ function services_node_load($node, $fields = array()) {
 }
 
 /**
- * Destroy session and setup services session.
+ * Backup current session data and import user session.
  */
-function services_session_restart($sessid) {
-  if ($sessid == session_id()) {
+function services_session_load($sessid) {
+  global $user;
+
+  // If user's session is already loaded, just return current user's data
+  if ($user->sid == $sessid) {
+    return $user;
+  }
+
+  // Make backup of current user and session data
+  $backup = $user;
+  $backup->session = session_encode();
+
+  // Empty current session data
+  foreach ($_SESSION as $key => $value) {
+    unset($_SESSION[$key]);
+  }
+
+  // Some client/servers, like XMLRPC, do not handle cookies, so imitate it to make sess_read() function try to look for user,
+  // instead of just loading anonymous user :).
+  if (!isset($_COOKIE[session_name()])) $_COOKIE[session_name()] = $sessid;
+
+  // Load session data
+  sess_read($sessid);
+
+  // Check if it really loaded user and, for additional security, if user was logged from the same IP. If not, then revert automatically.
+  if ($user->sid != $sessid || $user->hostname != $backup->hostname) {
+    services_session_unload($backup);
+    return NULL;
+  }
+
+  return $backup;
+}
+
+/**
+ * Revert to previously backuped session.
+ */
+function services_session_unload($backup) {
+  global $user;
+
+  // No point in reverting if it's the same user's data
+  if ($user->sid == $backup->sid) {
     return;
   }
-  session_id($sessid);
-  sess_read($sessid);
-  session_start();
+
+  // Some client/servers, like XMLRPC, do not handle cookies, so imitate it to make sess_read() function try to look for user,
+  // instead of just loading anonymous user :).
+  if (!isset($_COOKIE[session_name()])) $_COOKIE[session_name()] = $sessid;
+
+  // Save current session data
+  sess_write($user->sid, session_encode());
+
+  // Empty current session data
+  foreach ($_SESSION as $key => $value) {
+    unset($_SESSION[$key]);
+  }
+
+  // Revert to previous user and session data
+  $user = $backup;
+  session_decode($user->session);
 }
+
