@@ -22,7 +22,6 @@ function views_service_service() {
     array(
       '#method'   => 'views.getView',
       '#callback' => 'views_service_get_view',
-      '#args'     => array('string', 'array', 'array'),
       '#args'     => array(
         array(
           '#name'         => 'view_name',
@@ -45,6 +44,7 @@ function views_service_service() {
     array(
       '#method'   => 'views.exportView',
       '#callback' => 'views_service_export_view',
+      '#access arguments' => array('administer views'),
       '#args'     => array('string'),
       '#args'     => array(
         array(
@@ -62,6 +62,7 @@ function views_service_service() {
     array(
       '#method'   => 'views.importView',
       '#callback' => 'views_service_import_view',
+      '#access arguments' => array('administer views'),
       '#args'     => array('string'),
       '#args'     => array(
         array(
@@ -83,6 +84,11 @@ function views_service_get_view($view_name, $fields = array(), $args = array()) 
   $view = views_get_view($view_name);
   if (is_null($view)) {
     return services_error('View does not exist.');
+  }
+  
+  // Check access
+  if (!views_access($view)) {
+    return services_error('You do not have access to this view.');
   }
   
   $result = views_build_view('result', $view, $args);

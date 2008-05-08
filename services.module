@@ -361,6 +361,13 @@ function services_method_call($method_name, $args = array()) {
     $session_backup = services_session_load($sessid);
   }
   
+  // Check access
+  $access_arguments = isset($method['#access arguments']) ? $method['#access arguments'] : $args;
+  // Call default or custom access callback
+  if (call_user_func_array($method['#access callback'], $access_arguments) != true) {
+    return services_error(t('Access denied.'));
+  }
+  
   // Change working directory to drupal root to call drupal function,
   // then change it back to server module root to handle return.
   $server_root = getcwd();
@@ -421,6 +428,13 @@ function services_get_all() {
       // set method defaults
       if (!isset($methods[$key]['#auth'])) {
         $methods[$key]['#auth'] = true;
+      }
+      
+      if (!isset($methods[$key]['#access callback'])) {
+        $methods[$key]['#access callback'] = 'user_access';
+        if (!isset($methods[$key]['#access arguments'])) {
+          $methods[$key]['#access arguments'] = array('access services');
+        }
       }
 
       if (!isset($methods[$key]['#args'])) {

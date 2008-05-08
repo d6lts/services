@@ -13,6 +13,10 @@ function node_service_help($section) {
   }
 }
 
+function node_service_perm() {
+  return array('load raw node data');
+}
+
 /**
  * Implementation of hook_service()
  */
@@ -23,6 +27,7 @@ function node_service_service() {
     array(
       '#method'   => 'node.load',
       '#callback' => 'node_service_load',
+      '#access callback' => 'node_service_load_access',
       '#args'     => array(
         array(
           '#name'         => 'nid',
@@ -40,6 +45,7 @@ function node_service_service() {
     array(
       '#method'   => 'node.save',
       '#callback' => 'node_service_save',
+      '#access callback' => 'node_service_save_access',
       '#args'     => array(
         array(
           '#name'         => 'node',
@@ -52,6 +58,7 @@ function node_service_service() {
     array(
       '#method'   => 'node.delete',
       '#callback' => 'node_delete',
+      '#access callback' => 'node_service_delete_access',
       '#args'     => array(
         array(
           '#name'         => 'nid',
@@ -74,6 +81,11 @@ function node_service_load($nid, $fields = array()) {
   return $node;
 }
 
+function node_service_load_access($nid) {
+  $node = node_load($nid);
+  return node_access('view', $node) && user_access('load raw node data');
+}
+
 function node_service_save($edit) {
   
   // validate node  
@@ -86,4 +98,16 @@ function node_service_save($edit) {
   node_save($node);
   watchdog('content', t('@type: updated %title.', array('@type' => t($node->type), '%title' => $node->title)), WATCHDOG_NOTICE, l(t('view'), 'node/'. $node->nid));
   return $node;
+}
+
+function node_service_save_access($node) {
+  if (isset($node['nid'])) {
+    return node_access('update', $node);
+  }
+  return node_access('create', $node['type']);
+}
+
+function node_service_delete_access($nid) {
+  $node = node_load($nid);
+  return node_access('delete', $node);
 }
