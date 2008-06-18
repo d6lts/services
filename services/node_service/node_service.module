@@ -87,15 +87,18 @@ function node_service_load_access($nid) {
 }
 
 function node_service_save($edit) {
-  
-  // validate node  
-  node_validate($edit);
+  if ($edit['nid']) {
+    $node = node_load($edit['nid']);
+    if ($node->nid) {
+      $ret = drupal_execute($node->type .'_node_form', $edit, $edit);
+    }
+  }
+  else {
+    $ret= drupal_execute($edit['type'] .'_node_form', $edit, $edit);
+  }
   if ($errors = form_get_errors()) {
     return services_error(implode("\n", $errors));
   }
-
-  $node = node_submit($edit);
-  node_save($node);
   watchdog('content', t('@type: updated %title.', array('@type' => t($node->type), '%title' => $node->title)), WATCHDOG_NOTICE, l(t('view'), 'node/'. $node->nid));
   return $node;
 }
