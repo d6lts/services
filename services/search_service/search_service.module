@@ -21,6 +21,7 @@ function search_service_service() {
     array(
       '#method'   => 'search.searchNodes',
       '#callback' => 'search_service_search_nodes',
+      '#access arguments' => array('search content'),
       '#args'     => array(
         array(
           '#name'         => 'search_keys',
@@ -40,6 +41,7 @@ function search_service_service() {
     array(
       '#method'   => 'search.searchUsers',
       '#callback' => 'search_service_search_users',
+      '#access arguments' => array('search content'),
       '#args'     => array(
         array(
           '#name'         => 'search_keys',
@@ -57,11 +59,6 @@ function search_service_service() {
  * Callback for search.searchNodes service.
  */
 function search_service_search_nodes($keys, $simple = FALSE) {
-  // check permissions
-  if (!user_access('search content')) {
-    return services_error(t('User not authorized to search content.'));
-  }
-  
   // define standard keys for simple set
   $stdkeys = array('link', 'type', 'title', 'user', 'date', 'snippet');  
   
@@ -89,11 +86,6 @@ function search_service_search_nodes($keys, $simple = FALSE) {
  * Callback for search.searchNodes service.
  */
 function search_service_search_users($keys) {
-  // check permissions
-  if (!user_access('search content')) {
-    return services_error(t('User not authorized to search content.'));
-  }  
-  
   // invoke the search hook to generate results
   $results = module_invoke('user', 'search', 'search', $keys);
   if ($results && is_array($results) && count($results)) {
