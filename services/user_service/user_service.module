@@ -54,7 +54,15 @@ function user_service_service() {
  * login a user
  */
 function user_service_login($username, $password) {
+  global $user;
+  
+  if ($user->uid) {
+    // user is already logged in
+    return services_error(t('Already logged in as !user.', array('!user' => $user->name))); 
+  }
+  
   $user = user_authenticate($username, $password);
+  
   if ($user->uid) {
     session_start();
     $return = new stdClass();
@@ -71,7 +79,12 @@ function user_service_login($username, $password) {
  */
 function user_service_logout() {
   global $user;
-
+  
+  if (!$user->uid) {
+    // user is not logged in
+    return services_error(t('User is not logged in.'));
+  }
+  
   watchdog('user', t('Session closed for %name.', array('%name' => theme('placeholder', $user->name))));
 
   // Destroy the current session:
