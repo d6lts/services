@@ -327,7 +327,7 @@ function services_method_call($method_name, $args = array()) {
   // Check for missing args.
   foreach ($method['#args'] as $key => $arg) {
     if (!$arg['#optional']) {
-      if (empty($args[$key])) {
+      if (!is_numeric($args[$key]) && empty($args[$key])) {
         return services_error(t('Missing required arguments.'));
       }
     }
