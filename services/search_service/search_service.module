@@ -1,6 +1,9 @@
 <?php
 // $Id$
-
+/**
+ * @file
+ * The module which exposes services related to searching
+ */
 /**
  * Implementation of hook_help().
  */
@@ -21,6 +24,7 @@ function search_service_service() {
     array(
       '#method'   => 'search.searchNodes',
       '#callback' => 'search_service_search_nodes',
+      '#key' => FALSE,
       '#access arguments' => array('search content'),
       '#args'     => array(
         array(
@@ -41,6 +45,7 @@ function search_service_service() {
     array(
       '#method'   => 'search.searchUsers',
       '#callback' => 'search_service_search_users',
+      '#key' => FALSE,
       '#access arguments' => array('search content'),
       '#args'     => array(
         array(

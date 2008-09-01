@@ -1,6 +1,9 @@
 <?php
 // $Id$
-
+/**
+ * @file
+ * The module which implements an xml-rpc server for the services module
+ */
 function xmlrpc_server_server_info() {
   return array(
     '#name' => 'XMLRPC',

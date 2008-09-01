@@ -1,6 +1,9 @@
 <?php
 // $Id$
-
+/**
+ * @file
+ * The module which exposes services related to nodes
+ */
 /**
  * Implementation of hook_help().
  */
@@ -18,7 +21,7 @@ function node_service_perm() {
 }
 
 /**
- * Implementation of hook_service()
+ * Implementation of hook_service().
  */
 function node_service_service() {
   return array(
@@ -27,6 +30,7 @@ function node_service_service() {
     array(
       '#method'   => 'node.load',
       '#callback' => 'node_service_load',
+      '#key'      => FALSE,
       '#access callback' => 'node_service_load_access',
       '#args'     => array(
         array(

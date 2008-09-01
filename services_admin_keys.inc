@@ -1,6 +1,9 @@
 <?php
 // $Id$
-
+/**
+ * @file
+ * The file contains code which is used to create the keys interface
+ */
 function services_admin_keys_list() {
   $keys = services_get_keys();
   $header = array(t('Key'), t('Title'), t('Domain'), array('data' => t('Operations'), 'colspan' => '2'));
@@ -84,7 +87,7 @@ function services_admin_keys_form_submit($form_id, $form_values) {
 
 function services_admin_keys_save($key) {
   $is_existing = FALSE;
-  $key['kid'] = !empty($key['kid']) ? $key['kid'] : md5(uniqid(mt_rand(), true));
+  $key['kid'] = !empty($key['kid']) ? $key['kid'] : md5(uniqid(mt_rand(), TRUE));
   $is_existing = db_num_rows(db_query("SELECT * FROM {services_keys} WHERE kid = '%s'", $key['kid']));
   
   if (!$is_existing) {

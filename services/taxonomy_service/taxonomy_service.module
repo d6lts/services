@@ -1,6 +1,9 @@
 <?php
 // $Id$
-
+/**
+ * @file
+ * The module which exposes services related to taxonomy system
+ */
 /**
  * Implementation of hook_help().
  */

@@ -1,6 +1,9 @@
 <?php
 // $Id$
-
+/**
+ * @file
+ * This install creates the tables which are required by the services module 
+ */
 /**
  * Implementation of hook_install().
  */
@@ -14,6 +17,11 @@ function services_install() {
         domain varchar(255) NOT NULL default '',
         PRIMARY KEY (kid)
       ) /*!40100 DEFAULT CHARACTER SET UTF8 */");
+      db_query("CREATE TABLE {services_timestamp_nonce} (
+        timestamp varchar(32) NOT NULL default '',
+        domain varchar(255) NOT NULL default '',
+        nonce varchar(32) NOT NULL default ''
+      ) /*!40100 DEFAULT CHARACTER SET UTF8 */");
 
       break;
     case 'pgsql':
@@ -23,9 +31,39 @@ function services_install() {
         domain varchar(255) NOT NULL default '',
         PRIMARY KEY (kid)
       )");
-      
+      db_query("CREATE TABLE {services_timestamp_nonce} (
+        timestamp varchar(32) NOT NULL default '',
+        domain varchar(255) NOT NULL default '',
+        nonce varchar(32) NOT NULL default ''
+      )");
+
       break;
   }
+}
+
+function services_update_1() {
+
+  $ret = array();
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql("CREATE TABLE {services_timestamp_nonce} (
+        timestamp varchar(32) NOT NULL default '',
+        domain varchar(255) NOT NULL default '',
+        nonce varchar(32) NOT NULL default ''
+      ) /*!40100 DEFAULT CHARACTER SET UTF8 */");
+      break;
+    case 'pgsql':
+      $ret[] = update_sql("CREATE TABLE {services_timestamp_nonce} (
+        timestamp varchar(32) NOT NULL default '',
+        domain varchar(255) NOT NULL default '',
+        nonce varchar(32) NOT NULL default ''
+      )");
+
+      break;
+  }
+  
+  return $ret;
 }
 
 /**

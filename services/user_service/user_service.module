@@ -1,6 +1,9 @@
 <?php
 // $Id$
-
+/**
+ * @file
+ * The module which exposes services related to user activities
+ */
 /**
  * Implementation of hook_help().
  */
@@ -17,7 +20,6 @@ function user_service_help($section) {
 /**
  * Implementation of hook_service().
  */
- 
 function user_service_service() {
   return array(
     
@@ -94,5 +96,5 @@ function user_service_logout() {
   // Load the anonymous user
   $user = drupal_anonymous_user();
   
-  return true;
+  return TRUE;
 }

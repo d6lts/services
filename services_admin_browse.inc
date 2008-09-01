@@ -1,6 +1,9 @@
 <?php
 // $Id$
-
+/**
+ * @file
+ * The file contains code which is used to create the services testing interface
+ */
 /**
  * Callback for 'services/browse'.
  */
@@ -31,7 +34,7 @@ function services_admin_browse_index() {
   // group namespaces
   $services = array();
   foreach ($methods as $method) {
-    $namespace = substr($method['#method'], 0, strrpos($method['#method'], '.'));
+    $namespace = drupal_substr($method['#method'], 0, strrpos($method['#method'], '.'));
     $services[$namespace][] = $method;
   }
   
@@ -110,29 +113,36 @@ function services_admin_browse_test() {
   $form = array();
   $method = services_method_get(arg(4));
   
-  $form['arg'] = array('#tree' => true);
+  $form['arg'] = array('#tree' => TRUE);
   
+  $timestamp = time();
+  $nonce = user_password();
+  $args_hash = array();
   foreach ($method['#args'] as $key => $arg) {
     $form['name'][$key]         = array('#value' => $arg['#name']);
     $form['optional'][$key]     = array('#value' => ($arg['#optional']) ? t('optional') : t('required'));
     //$form['type'][$key]         = array('#value' => $arg['#type']);
     
     switch ($arg['#name']) {
-            
-      case 'api_key':
-        $form['arg'][$key] = array('#type' => 'textfield', '#default_value' => services_admin_browse_get_first_key());
+ 
+      case 'hash':
+        $form['arg'][$key] = array('#title' => 'Hash', '#type' => 'textfield', '#default_value' => hash_hmac("sha256", $timestamp . $_SERVER['HTTP_HOST'] . $nonce . arg(4), services_admin_browse_get_first_key()));
         break;
       
       case 'sessid':
-        $form['arg'][$key] = array('#type' => 'textfield', '#default_value' => session_id());
+        $form['arg'][$key] = array('#title' => 'Session id', '#type' => 'textfield', '#default_value' => session_id());
         break;
       
-      case 'domain_check':
-        $form['arg'][$key] = array('#type' => 'textfield', '#default_value' => $_SERVER['HTTP_HOST']);
+      case 'domain_name':
+        $form['arg'][$key] = array('#title' => 'Domain name','#type' => 'textfield', '#default_value' => $_SERVER['HTTP_HOST']);
         break;
         
       case 'domain_time_stamp':
-        $form['arg'][$key] = array('#type' => 'textfield', '#default_value' => time());
+        $form['arg'][$key] = array('#title' => 'Timestamp', '#type' => 'textfield', '#default_value' => $timestamp);
+        break;
+        
+      case 'nonce':
+        $form['arg'][$key] = array('#title' => 'Nonce', '#type' => 'textfield', '#default_value' => $nonce);
         break;
           
       default:
@@ -141,9 +151,10 @@ function services_admin_browse_test() {
     }
     
   }
+    
   $form['submit'] = array('#type' => 'submit', '#value' => t('Call method'));
   
-  $form['#redirect'] = false;
+  $form['#redirect'] = FALSE;
   return $form;
 }
 
@@ -159,7 +170,7 @@ function services_admin_browse_test_submit($form_id, $form_values) {
   $method = services_method_get(arg(4));
   $args = services_admin_browse_test_unserialize_args($form_values['arg']);
   $result = services_method_call($method['#method'], $args);
-  $_services_admin_browse_test_submit_result = '<pre>'. htmlspecialchars(print_r($result, true)) .'</pre>';
+  $_services_admin_browse_test_submit_result = '<pre>'. htmlspecialchars(print_r($result, TRUE)) .'</pre>';
 }
 
 function services_admin_browse_test_unserialize_args($values) {
@@ -173,12 +184,12 @@ function services_admin_browse_test_unserialize_args($values) {
     // Remove empty values from end of array.
     // Once we find a value, we can no longer skip.
     if (!is_numeric($value) && empty($value) && !$noskip) continue;
-    $noskip = true;
+    $noskip = TRUE;
     
     switch ($arg['#type']) {
       case 'array' :
         if (empty($value)) {
-          $return[$c] = null;
+          $return[$c] = NULL;
         }
         else {
           $return[$c] = explode(',', $value);
@@ -205,8 +216,17 @@ function theme_services_admin_browse_test($form) {
   $header = array(t('Name'), t('Required'), t('Value'));
   $rows = array();
   foreach (element_children($form['name']) as $key => $type) {
+   
     $row = array();
-    $row[] = drupal_render($form['name'][$key]);
+    
+    if (isset($form['arg'][$key]['#title'])) {
+      $row[] = $form['arg'][$key]['#title'];
+      unset($form['arg'][$key]['#title']);
+      unset($form['name'][$key]); 
+    }
+    else{
+      $row[] = drupal_render($form['name'][$key]);
+    }
     $row[] = drupal_render($form['optional'][$key]);
     $row[] = drupal_render($form['arg'][$key]);
     $rows[] = $row;

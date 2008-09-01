@@ -1,6 +1,9 @@
 <?php
 // $Id$
-
+/**
+ * @file
+ * The module which exposes services related to system activies
+ */
 /**
  * Implementation of hook_help().
  */
@@ -18,7 +21,7 @@ function system_service_perm() {
 }
 
 /**
- * Implementation of hook_service()
+ * Implementation of hook_service().
  */
 function system_service_service() {
   return array(
@@ -27,7 +30,8 @@ function system_service_service() {
     array(
       '#method'   => 'system.connect',
       '#callback' => 'system_service_connect',
-      '#auth'     => false,
+      '#key'      => FALSE,
+      '#auth'     => FALSE,
       '#return'   => 'struct',
       '#help'     => t('Returns an object containing a sessid and user.')),
       
@@ -60,13 +64,13 @@ function system_service_service() {
         array(
           '#name'         => 'from',
           '#type'         => 'string',
-          '#optional'     => true,
+          '#optional'     => TRUE,
           '#description'  => t('Sets From, Reply-To, Return-Path and Error-To to this value, if given.'),
         ),
         array(
           '#name'         => 'headers',
           '#type'         => 'array',
-          '#optional'     => true,
+          '#optional'     => TRUE,
           '#description'  => t('Associative array containing the headers to add. This is typically used to add extra headers (From, Cc, and Bcc).'),
         ),
       ),
@@ -142,7 +146,7 @@ function system_service_connect() {
 
 /**
  * Send an email via the Services module.
- */ 
+ */
 function system_service_mail($mailkey, $to, $subject, $body, $from = NULL, $headers = array()) {
   $status = drupal_mail($mailkey, $to, $subject, $body, $from, $headers);
   if (!$status) {
