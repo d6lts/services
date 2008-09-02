@@ -180,7 +180,7 @@ function services_menu($may_cache) {
             );
             $items[] = array(
               'path' => 'admin/build/services/keys/'. $key->kid .'/delete',
-              'title' => t($type->name),
+              'title' => '',
               'access' => $admin_access,
               'callback' => 'drupal_get_form',
               'callback arguments' => array('services_admin_keys_delete_confirm', $key),
@@ -265,15 +265,15 @@ function services_crossdomain_xml() {
   global $base_url;
   $output = '<!DOCTYPE cross-domain-policy SYSTEM "http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">'."\n";
   $output .= '<cross-domain-policy>'."\n";
-  $output .= '  <allow-access-from domain="'. $_SERVER['HTTP_HOST'] .'" />'."\n";
-  $output .= '  <allow-access-from domain="*.'. $_SERVER['HTTP_HOST'] .'" />'."\n";
+  $output .= '  <allow-access-from domain="'. check_plain($_SERVER['HTTP_HOST']) .'" />'."\n";
+  $output .= '  <allow-access-from domain="*.'. check_plain($_SERVER['HTTP_HOST']) .'" />'."\n";
   
   $keys = services_get_keys();
   
   foreach ($keys as $key) {
     if (!empty($key->domain)) {
-      $output .= '  <allow-access-from domain="'. $key->domain .'" />'."\n";
-      $output .= '  <allow-access-from domain="*.'. $key->domain .'" />'."\n";
+      $output .= '  <allow-access-from domain="'. check_plain($key->domain) .'" />'."\n";
+      $output .= '  <allow-access-from domain="*.'. check_plain($key->domain) .'" />'."\n";
     }
   }
   
@@ -315,7 +315,7 @@ function services_error($message) {
     
   // Look for custom error handling function.
   // Should be defined in each server module.
-  if (module_hook($server_info->module, 'server_error')) {
+  if ($server_info && module_hook($server_info->module, 'server_error')) {
     return module_invoke($server_info->module, 'server_error', $message);
   }
   
@@ -337,7 +337,7 @@ function services_cron() {
 /**
  * This is the magic function through which all remote method calls must pass.
  */
-function services_method_call($method_name, $args = array()) {
+function services_method_call($method_name, $args = array(), $ignore_hash = FALSE) {
   $method = services_method_get($method_name);
   
   // Check that method exists.
@@ -356,7 +356,12 @@ function services_method_call($method_name, $args = array()) {
     // Key is part of the hash
     if ($arg['#signed'] == TRUE && variable_get('services_use_key', TRUE)) {
       if (is_numeric($args[$key]) || !empty($args[$key])) {
-        $hash_parameters[] = $args[$key];
+        if (is_array($args[$key]) || is_object($args[$key])){
+          $hash_parameters[] = serialize($args[$key]);
+        }
+        else{
+          $hash_parameters[] = $args[$key];
+        }
       }
       else{
         $hash_parameters[] = '';
@@ -539,9 +544,9 @@ function services_method_get($method_name) {
 }
 
 function services_validate_key($kid, $timestamp, $domain, $nonce, $method_name, $hash_parameters, $hash) {  
-  $hash_parameters_string = implode(';', $hash_parameters);
-  $rehash = hash_hmac("sha256", $timestamp . $domain . $nonce . $method_name . $hash_parameters_string, $kid);
-  return $rehash == $hash ? TRUE : FALSE;
+  $hash_parameters = array_merge(array($timestamp, $domain, $nonce, $method_name), $hash_parameters);
+  $rehash = hash_hmac("sha256", implode(';', $hash_parameters), $kid);
+  return $rehash == $hash;
 }
 
 function services_get_key($kid) {

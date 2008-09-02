@@ -48,7 +48,7 @@ function services_update_1() {
     case 'mysql':
     case 'mysqli':
       $ret[] = update_sql("CREATE TABLE {services_timestamp_nonce} (
-        timestamp varchar(32) NOT NULL default '',
+        timestamp int NOT NULL,
         domain varchar(255) NOT NULL default '',
         nonce varchar(32) NOT NULL default ''
       ) /*!40100 DEFAULT CHARACTER SET UTF8 */");
