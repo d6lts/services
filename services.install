@@ -124,3 +124,11 @@ function services_update_6001() {
   db_create_table($update, 'services_timestamp_nonce', $schema['services_timestamp_nonce']);
   return $update;
 }
+
+/*
+ * Update to ensure that new menu options are loaded.
+ */
+function services_update_6002() {
+  $update = array();
+  return $update;
+}
