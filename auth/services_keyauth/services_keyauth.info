@@ -1,6 +1,0 @@
-; $Id$
-name = Key Authentication
-description = Provides key authentication for the services module
-package = Services - authentication
-dependencies[] = services
-core = 6.x
