@@ -1,0 +1,6 @@
+; $Id$
+core            = "6.x"
+dependencies[]  = services
+description     = "Provides a menu service."
+name            = "Menu Service"
+package         = "Services - services"
