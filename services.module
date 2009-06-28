@@ -147,7 +147,7 @@ function services_menu() {
  * 
  */
 function services_auth_access() {
-  return user_access('administer services') && variable_get('services_use_key', FALSE);
+  return user_access('administer services') && variable_get('services_use_key', TRUE);
 }
 
 /**
