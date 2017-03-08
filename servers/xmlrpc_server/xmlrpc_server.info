@@ -3,8 +3,3 @@ description = Provides an XMLRPC server.
 package = Services - servers
 dependencies[] = services
 core = 6.x
-; Information added by Drupal 6 LTS vendors on 2017-03-08
-version = "6.x-3.4"
-core = "6.x"
-project = "services"
-datestamp = "1488993917"
