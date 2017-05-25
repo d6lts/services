@@ -36,6 +36,12 @@ class ServiceResourceConfigForm extends ServiceResourceBaseForm {
       '#options' => $this->getAuthOptions(),
       '#default_value' => $entity->getAuthentication(),
     ];
+    $form['no_cache'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Disable cache'),
+      '#description' => $this->t('Do not cache the response of the resource.'),
+      '#default_value' => $entity->getNoCache()
+    ];
 
     return $form;
   }

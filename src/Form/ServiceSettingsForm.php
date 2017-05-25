@@ -48,6 +48,12 @@ class ServiceSettingsForm extends ConfigFormBase {
       '#options' => $this->getAuthOptions(),
       '#default_value' => $config->get('default_authentication'),
     ];
+    $form['default_no_cache'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Disable cache'),
+      '#description' => $this->t('Do not cache the response of the resources by default.'),
+      '#default_value' => $config->get('default_no_cache')
+    ];
 
     return parent::buildForm($form, $form_state);
   }

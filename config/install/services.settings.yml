@@ -2,3 +2,4 @@ default_formats:
   - json
 default_authentication:
   - cookie
+default_no_cache: 0

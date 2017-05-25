@@ -23,3 +23,6 @@ services.endpoint_resource.*:
       sequence:
         type: string
         label: 'Allowed authentication methods'
+    no_cache:
+      type: 'boolean'
+      label: 'Do not cache this response'

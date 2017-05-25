@@ -69,6 +69,13 @@ class ServiceResource extends ConfigEntityBase implements ServiceResourceInterfa
   protected $authentication = [];
 
   /**
+   * Resource no cache option.
+   *
+   * @var array
+   */
+  protected $no_cache = NULL;
+
+  /**
    * {@inheritdoc}
    */
   public function id() {
@@ -104,6 +111,17 @@ class ServiceResource extends ConfigEntityBase implements ServiceResourceInterfa
     }
 
     return $this->getDefaultSettings()->get('default_authentication');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getNoCache() {
+    if (isset($this->no_cache)) {
+      return $this->no_cache;
+    }
+
+    return $this->getDefaultSettings()->get('default_no_cache');
   }
 
   /**
