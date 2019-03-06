@@ -511,7 +511,7 @@ function services_resource_build_index_query($schema, $order, $page, $fields, $s
   // need to append table prefix
   if ($fields_array = explode(',', $fields)) {
     foreach ($fields_array as &$field) {
-      $field = $primary_table . '.' . db_escape_table(trim($field)));
+      $field = $primary_table . '.' . db_escape_table(trim($field));
     }
     $fields = implode(',', $fields_array);
   }
