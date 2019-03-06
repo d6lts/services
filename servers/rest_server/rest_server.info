@@ -5,3 +5,8 @@ dependencies[] = services
 dependencies[] = autoload
 dependencies[] = libraries
 core = 6.x
+; Information added by Drupal 6 LTS vendors on 2019-03-06
+version = "6.x-3.6"
+core = "6.x"
+project = "services"
+datestamp = "1551900388"
