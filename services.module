@@ -507,12 +507,11 @@ function services_resources_as_procedures($resource, $resource_name) {
 function services_resource_build_index_query($schema, $order, $page, $fields, $service_params = array(), $primary_table, $primary_field, $page_size, $resource) {
   $where = array();
   $query_params = array();
-  $fields = db_escape_string($fields);
 
   // need to append table prefix
   if ($fields_array = explode(',', $fields)) {
     foreach ($fields_array as &$field) {
-      $field = $primary_table . '.' . trim($field);
+      $field = $primary_table . '.' . db_escape_table(trim($field)));
     }
     $fields = implode(',', $fields_array);
   }
