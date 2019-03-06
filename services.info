@@ -4,8 +4,3 @@ package = Services
 core = 6.x
 php = 5.x
 dependencies[] = ctools
-; Information added by Drupal 6 LTS vendors on 2019-03-06
-version = "6.x-3.5"
-core = "6.x"
-project = "services"
-datestamp = "1551885137"
